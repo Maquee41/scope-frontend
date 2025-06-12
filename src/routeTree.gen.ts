@@ -11,35 +11,23 @@
 // Import Routes
 
 import { Route as rootRoute } from './routes/__root'
-import { Route as WorkflowImport } from './routes/workflow'
-import { Route as SignUpImport } from './routes/sign-up'
-import { Route as ProfileImport } from './routes/profile'
-import { Route as LoginImport } from './routes/login'
+import { Route as AuthImport } from './routes/_auth'
+import { Route as AuthLoginImport } from './routes/_auth/login'
+import { Route as AuthSignUpImport } from './routes/_auth/sign-up'
+import { Route as PrivateImport } from './routes/_private'
+import { Route as PrivateProfileImport } from './routes/_private/profile'
+import { Route as PrivateWorkflowImport } from './routes/_private/workflow'
 import { Route as IndexImport } from './routes/index'
 
 // Create/Update Routes
 
-const WorkflowRoute = WorkflowImport.update({
-  id: '/workflow',
-  path: '/workflow',
+const PrivateRoute = PrivateImport.update({
+  id: '/_private',
   getParentRoute: () => rootRoute,
 } as any)
 
-const SignUpRoute = SignUpImport.update({
-  id: '/sign-up',
-  path: '/sign-up',
-  getParentRoute: () => rootRoute,
-} as any)
-
-const ProfileRoute = ProfileImport.update({
-  id: '/profile',
-  path: '/profile',
-  getParentRoute: () => rootRoute,
-} as any)
-
-const LoginRoute = LoginImport.update({
-  id: '/login',
-  path: '/login',
+const AuthRoute = AuthImport.update({
+  id: '/_auth',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -47,6 +35,30 @@ const IndexRoute = IndexImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRoute,
+} as any)
+
+const PrivateWorkflowRoute = PrivateWorkflowImport.update({
+  id: '/workflow',
+  path: '/workflow',
+  getParentRoute: () => PrivateRoute,
+} as any)
+
+const PrivateProfileRoute = PrivateProfileImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => PrivateRoute,
+} as any)
+
+const AuthSignUpRoute = AuthSignUpImport.update({
+  id: '/sign-up',
+  path: '/sign-up',
+  getParentRoute: () => AuthRoute,
+} as any)
+
+const AuthLoginRoute = AuthLoginImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => AuthRoute,
 } as any)
 
 // Populate the FileRoutesByPath interface
@@ -60,87 +72,134 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexImport
       parentRoute: typeof rootRoute
     }
-    '/login': {
-      id: '/login'
+    '/_auth': {
+      id: '/_auth'
+      path: ''
+      fullPath: ''
+      preLoaderRoute: typeof AuthImport
+      parentRoute: typeof rootRoute
+    }
+    '/_private': {
+      id: '/_private'
+      path: ''
+      fullPath: ''
+      preLoaderRoute: typeof PrivateImport
+      parentRoute: typeof rootRoute
+    }
+    '/_auth/login': {
+      id: '/_auth/login'
       path: '/login'
       fullPath: '/login'
-      preLoaderRoute: typeof LoginImport
-      parentRoute: typeof rootRoute
+      preLoaderRoute: typeof AuthLoginImport
+      parentRoute: typeof AuthImport
     }
-    '/profile': {
-      id: '/profile'
-      path: '/profile'
-      fullPath: '/profile'
-      preLoaderRoute: typeof ProfileImport
-      parentRoute: typeof rootRoute
-    }
-    '/sign-up': {
-      id: '/sign-up'
+    '/_auth/sign-up': {
+      id: '/_auth/sign-up'
       path: '/sign-up'
       fullPath: '/sign-up'
-      preLoaderRoute: typeof SignUpImport
-      parentRoute: typeof rootRoute
+      preLoaderRoute: typeof AuthSignUpImport
+      parentRoute: typeof AuthImport
     }
-    '/workflow': {
-      id: '/workflow'
+    '/_private/profile': {
+      id: '/_private/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof PrivateProfileImport
+      parentRoute: typeof PrivateImport
+    }
+    '/_private/workflow': {
+      id: '/_private/workflow'
       path: '/workflow'
       fullPath: '/workflow'
-      preLoaderRoute: typeof WorkflowImport
-      parentRoute: typeof rootRoute
+      preLoaderRoute: typeof PrivateWorkflowImport
+      parentRoute: typeof PrivateImport
     }
   }
 }
 
 // Create and export the route tree
 
+interface AuthRouteChildren {
+  AuthLoginRoute: typeof AuthLoginRoute
+  AuthSignUpRoute: typeof AuthSignUpRoute
+}
+
+const AuthRouteChildren: AuthRouteChildren = {
+  AuthLoginRoute: AuthLoginRoute,
+  AuthSignUpRoute: AuthSignUpRoute,
+}
+
+const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)
+
+interface PrivateRouteChildren {
+  PrivateProfileRoute: typeof PrivateProfileRoute
+  PrivateWorkflowRoute: typeof PrivateWorkflowRoute
+}
+
+const PrivateRouteChildren: PrivateRouteChildren = {
+  PrivateProfileRoute: PrivateProfileRoute,
+  PrivateWorkflowRoute: PrivateWorkflowRoute,
+}
+
+const PrivateRouteWithChildren =
+  PrivateRoute._addFileChildren(PrivateRouteChildren)
+
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/login': typeof LoginRoute
-  '/profile': typeof ProfileRoute
-  '/sign-up': typeof SignUpRoute
-  '/workflow': typeof WorkflowRoute
+  '': typeof PrivateRouteWithChildren
+  '/login': typeof AuthLoginRoute
+  '/sign-up': typeof AuthSignUpRoute
+  '/profile': typeof PrivateProfileRoute
+  '/workflow': typeof PrivateWorkflowRoute
 }
 
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/login': typeof LoginRoute
-  '/profile': typeof ProfileRoute
-  '/sign-up': typeof SignUpRoute
-  '/workflow': typeof WorkflowRoute
+  '': typeof PrivateRouteWithChildren
+  '/login': typeof AuthLoginRoute
+  '/sign-up': typeof AuthSignUpRoute
+  '/profile': typeof PrivateProfileRoute
+  '/workflow': typeof PrivateWorkflowRoute
 }
 
 export interface FileRoutesById {
   __root__: typeof rootRoute
   '/': typeof IndexRoute
-  '/login': typeof LoginRoute
-  '/profile': typeof ProfileRoute
-  '/sign-up': typeof SignUpRoute
-  '/workflow': typeof WorkflowRoute
+  '/_auth': typeof AuthRouteWithChildren
+  '/_private': typeof PrivateRouteWithChildren
+  '/_auth/login': typeof AuthLoginRoute
+  '/_auth/sign-up': typeof AuthSignUpRoute
+  '/_private/profile': typeof PrivateProfileRoute
+  '/_private/workflow': typeof PrivateWorkflowRoute
 }
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/login' | '/profile' | '/sign-up' | '/workflow'
+  fullPaths: '/' | '' | '/login' | '/sign-up' | '/profile' | '/workflow'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/login' | '/profile' | '/sign-up' | '/workflow'
-  id: '__root__' | '/' | '/login' | '/profile' | '/sign-up' | '/workflow'
+  to: '/' | '' | '/login' | '/sign-up' | '/profile' | '/workflow'
+  id:
+    | '__root__'
+    | '/'
+    | '/_auth'
+    | '/_private'
+    | '/_auth/login'
+    | '/_auth/sign-up'
+    | '/_private/profile'
+    | '/_private/workflow'
   fileRoutesById: FileRoutesById
 }
 
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  LoginRoute: typeof LoginRoute
-  ProfileRoute: typeof ProfileRoute
-  SignUpRoute: typeof SignUpRoute
-  WorkflowRoute: typeof WorkflowRoute
+  AuthRoute: typeof AuthRouteWithChildren
+  PrivateRoute: typeof PrivateRouteWithChildren
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  LoginRoute: LoginRoute,
-  ProfileRoute: ProfileRoute,
-  SignUpRoute: SignUpRoute,
-  WorkflowRoute: WorkflowRoute,
+  AuthRoute: AuthRouteWithChildren,
+  PrivateRoute: PrivateRouteWithChildren,
 }
 
 export const routeTree = rootRoute
@@ -154,26 +213,42 @@ export const routeTree = rootRoute
       "filePath": "__root.tsx",
       "children": [
         "/",
-        "/login",
-        "/profile",
-        "/sign-up",
-        "/workflow"
+        "/_auth",
+        "/_private"
       ]
     },
     "/": {
       "filePath": "index.tsx"
     },
-    "/login": {
-      "filePath": "login.tsx"
+    "/_auth": {
+      "filePath": "_auth.tsx",
+      "children": [
+        "/_auth/login",
+        "/_auth/sign-up"
+      ]
     },
-    "/profile": {
-      "filePath": "profile.tsx"
+    "/_private": {
+      "filePath": "_private.tsx",
+      "children": [
+        "/_private/profile",
+        "/_private/workflow"
+      ]
     },
-    "/sign-up": {
-      "filePath": "sign-up.tsx"
+    "/_auth/login": {
+      "filePath": "_auth/login.tsx",
+      "parent": "/_auth"
     },
-    "/workflow": {
-      "filePath": "workflow.tsx"
+    "/_auth/sign-up": {
+      "filePath": "_auth/sign-up.tsx",
+      "parent": "/_auth"
+    },
+    "/_private/profile": {
+      "filePath": "_private/profile.tsx",
+      "parent": "/_private"
+    },
+    "/_private/workflow": {
+      "filePath": "_private/workflow.tsx",
+      "parent": "/_private"
     }
   }
 }
