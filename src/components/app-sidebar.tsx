@@ -1,4 +1,4 @@
-import { Command, Frame, Map, PieChart } from 'lucide-react'
+import { Command } from 'lucide-react'
 import * as React from 'react'
 
 import { NavProjects } from '@/components/nav-projects'
@@ -12,35 +12,30 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from '@/components/ui/sidebar'
+import { getProfileData } from '@/services/profileService'
+import { getWorkspaces } from '@/services/workspaceService'
+import { useAuthStore } from '@/store/auth'
+import { useQuery } from '@tanstack/react-query'
 import { useNavigate } from '@tanstack/react-router'
-
-const data = {
-  user: {
-    name: 'shadcn',
-    email: 'm@example.com',
-    avatar: '/avatars/shadcn.jpg',
-  },
-  projects: [
-    {
-      name: 'Design Engineering',
-      url: '#',
-      icon: Frame,
-    },
-    {
-      name: 'Sales & Marketing',
-      url: '#',
-      icon: PieChart,
-    },
-    {
-      name: 'Travel',
-      url: '#',
-      icon: Map,
-    },
-  ],
-}
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const navigate = useNavigate()
+  const access = useAuthStore((s) => s.access)
+
+  const { data: user } = useQuery({
+    queryKey: ['me', access],
+    queryFn: () => {
+      if (!access) return Promise.reject('No access token')
+      return getProfileData(access)
+    },
+    enabled: !!access,
+  })
+
+  const { data: projects } = useQuery({
+    queryKey: ['workspaces', access],
+    queryFn: () => getWorkspaces(access),
+    enabled: !!access,
+  })
 
   return (
     <Sidebar variant="inset" {...props}>
@@ -65,10 +60,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        <NavProjects projects={data.projects} />
+        <NavProjects projects={projects} />
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={data.user} />
+        {user ? <NavUser user={user} /> : <div>Error</div>}
       </SidebarFooter>
     </Sidebar>
   )

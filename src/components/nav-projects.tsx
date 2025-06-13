@@ -1,13 +1,17 @@
 'use client'
 
+import { Folder, MoreHorizontal, Plus, Share, Trash2 } from 'lucide-react'
+
 import {
-  Folder,
-  MoreHorizontal,
-  Plus,
-  Share,
-  Trash2,
-  type LucideIcon,
-} from 'lucide-react'
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog'
 
 import {
   DropdownMenu,
@@ -16,6 +20,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+
 import {
   SidebarGroup,
   SidebarGroupLabel,
@@ -26,35 +31,111 @@ import {
   useSidebar,
 } from '@/components/ui/sidebar'
 
+import { useCreateWorkspace } from '@/hooks/useCreateWorkspace'
+import { useRouter } from '@tanstack/react-router'
+import { useState } from 'react'
+import { Button } from './ui/button'
+import { Input } from './ui/input'
+import { Label } from './ui/label'
+
 export function NavProjects({
   projects,
 }: {
   projects: {
+    id: number
     name: string
-    url: string
-    icon: LucideIcon
   }[]
 }) {
   const { isMobile } = useSidebar()
+  const [workspaceName, setWorkspaceName] = useState('Scope Team')
+  const createWorkspace = useCreateWorkspace()
+
+  const router = useRouter()
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+
+    console.log(`submit: ${workspaceName}`)
+
+    if (!workspaceName.trim()) return
+
+    createWorkspace.mutate(
+      { name: workspaceName },
+      {
+        onSuccess: () => {
+          setWorkspaceName('')
+        },
+        onError: (err) => {
+          console.error('Ошибка создания workspace:', err)
+        },
+      },
+    )
+  }
 
   return (
     <SidebarGroup className="group-data-[collapsible=icon]:hidden">
       <div className="flex justify-between items-center">
         <SidebarGroupLabel>Projects</SidebarGroupLabel>
-        <Plus
-          width={20}
-          className="text-sidebar-foreground/70 hover:text-sidebar-foreground/55 cursor-pointer transition-colors"
-        />
+        <Dialog>
+          <DialogTrigger asChild>
+            <Plus
+              width={20}
+              className="text-sidebar-foreground/70 hover:text-sidebar-foreground/55 cursor-pointer transition-colors"
+            />
+          </DialogTrigger>
+
+          <DialogContent className="sm:max-w-[425px]">
+            <form onSubmit={handleSubmit}>
+              <DialogHeader>
+                <DialogTitle>Create Workspace</DialogTitle>
+                <DialogDescription>
+                  Create new workspace for your team and add new members. Click
+                  save when you&apos;re done.
+                </DialogDescription>
+              </DialogHeader>
+
+              <div className="grid gap-4 py-4">
+                <div className="grid gap-3">
+                  <Label htmlFor="workspace-name">Name</Label>
+                  <Input
+                    id="workspace-name"
+                    name="name"
+                    value={workspaceName}
+                    onChange={(e) => setWorkspaceName(e.target.value)}
+                  />
+                </div>
+              </div>
+
+              <DialogFooter>
+                <DialogClose asChild>
+                  <Button type="button" variant="outline">
+                    Cancel
+                  </Button>
+                </DialogClose>
+                <Button type="submit" disabled={createWorkspace.isPending}>
+                  {createWorkspace.isPending ? 'Creating...' : 'Create'}
+                </Button>
+              </DialogFooter>
+            </form>
+          </DialogContent>
+        </Dialog>
       </div>
+
       <SidebarMenu>
-        {projects.map((item) => (
-          <SidebarMenuItem key={item.name}>
+        {projects?.map((item) => (
+          <SidebarMenuItem key={item.id}>
             <SidebarMenuButton asChild>
-              <a href={item.url}>
-                <item.icon />
+              <div
+                className="cursor-pointer"
+                onClick={() => {
+                  router.navigate({ to: `/workflow/${item.id}` })
+                }}
+              >
+                <Folder className="mr-2" />
                 <span>{item.name}</span>
-              </a>
+              </div>
             </SidebarMenuButton>
+
             <DropdownMenu>
               <DropdownMenuTrigger asChild className="cursor-pointer">
                 <SidebarMenuAction showOnHover>
@@ -62,6 +143,7 @@ export function NavProjects({
                   <span className="sr-only">More</span>
                 </SidebarMenuAction>
               </DropdownMenuTrigger>
+
               <DropdownMenuContent
                 className="w-48"
                 side={isMobile ? 'bottom' : 'right'}

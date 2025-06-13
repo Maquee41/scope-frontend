@@ -45,12 +45,9 @@ api.interceptors.response.use(
       isRefreshing = true
 
       try {
-        const { data } = await axios.post(
-          'http://localhost:8000/users/token/refresh/',
-          {
-            refresh: store.refresh,
-          },
-        )
+        const { data } = await api.post('/users/token/refresh/', {
+          refresh: store.refresh,
+        })
 
         store.setTokens(data.access, store.refresh)
         processQueue(null, data.access)
