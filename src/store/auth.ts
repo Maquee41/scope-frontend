@@ -5,8 +5,10 @@ type AuthState = {
   access: string | null
   refresh: string | null
   isAuthenticated: boolean
+  hydrated: boolean
   setTokens: (access: string, refresh: string) => void
   logout: () => void
+  setHydrated: () => void
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -15,13 +17,18 @@ export const useAuthStore = create<AuthState>()(
       access: null,
       refresh: null,
       isAuthenticated: false,
+      hydrated: false,
+      setHydrated: () => set({ hydrated: true }),
       setTokens: (access, refresh) =>
-        set({ access: access, refresh: refresh, isAuthenticated: true }),
+        set({ access, refresh, isAuthenticated: true }),
       logout: () =>
         set({ access: null, refresh: null, isAuthenticated: false }),
     }),
-    { name: 'auth-store' },
+    {
+      name: 'auth-store',
+      onRehydrateStorage: () => () => {
+        useAuthStore.getState().setHydrated()
+      },
+    },
   ),
 )
-
-export type AuthContext = ReturnType<typeof useAuthStore>

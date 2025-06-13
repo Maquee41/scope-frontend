@@ -19,10 +19,15 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '@/components/ui/sheet'
-import { getProfileData } from '@/services/profileService'
+import {
+  getProfileData,
+  updateProfileData,
+  type IUserProfile,
+} from '@/services/profileService'
 import { useAuthStore } from '@/store/auth'
-import { useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
+import { useEffect, useState } from 'react'
 
 export const Route = createFileRoute('/_private/profile')({
   component: Profile,
@@ -39,6 +44,22 @@ function ProfileField({ label, value }: { label: string; value: string }) {
 
 function Profile() {
   const access = useAuthStore((s) => s.access)
+  const queryClient = useQueryClient()
+
+  const { mutate, isPending } = useMutation({
+    mutationKey: ['update profile'],
+    mutationFn: async (data: IUserProfile) => {
+      return await updateProfileData(access!, data)
+    },
+    onSuccess: (updatedData) => {
+      queryClient.setQueryData(['me', access], updatedData)
+    },
+  })
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    mutate(formData)
+  }
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ['me', access],
@@ -49,7 +70,28 @@ function Profile() {
     enabled: !!access,
   })
 
-  const user = data ?? {}
+  const user = data ?? {
+    username: '',
+    first_name: '',
+    last_name: '',
+  }
+
+  const [formData, setFormData] = useState<IUserProfile>(user)
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { id, value } = e.target
+    setFormData((prev) => ({ ...prev, [id]: value }))
+  }
+
+  useEffect(() => {
+    if (data) {
+      setFormData({
+        username: data.username || '',
+        first_name: data.first_name || '',
+        last_name: data.last_name || '',
+      })
+    }
+  }, [data])
 
   if (isLoading) return <div>Loading...</div>
   if (isError) return <div>Error loading profile</div>
@@ -82,26 +124,42 @@ function Profile() {
                   reflected instantly.
                 </SheetDescription>
               </SheetHeader>
-              <div className="grid flex-1 auto-rows-min gap-6 px-4">
-                <div className="grid gap-3">
-                  <Label htmlFor="username">Username</Label>
-                  <Input id="username" defaultValue={user.username} />
+              <form onSubmit={handleSubmit}>
+                <div className="grid flex-1 auto-rows-min gap-6 px-4">
+                  <div className="grid gap-3">
+                    <Label htmlFor="username">Username</Label>
+                    <Input
+                      id="username"
+                      value={formData.username}
+                      onChange={handleChange}
+                    />
+                  </div>
+                  <div className="grid gap-3">
+                    <Label htmlFor="first_name">First Name</Label>
+                    <Input
+                      id="first_name"
+                      defaultValue={formData.first_name}
+                      onChange={handleChange}
+                    />
+                  </div>
+                  <div className="grid gap-3">
+                    <Label htmlFor="last_name">Last Name</Label>
+                    <Input
+                      id="last_name"
+                      defaultValue={formData.last_name}
+                      onChange={handleChange}
+                    />
+                  </div>
                 </div>
-                <div className="grid gap-3">
-                  <Label htmlFor="first-name">First Name</Label>
-                  <Input id="first-name" defaultValue={user.first_name} />
-                </div>
-                <div className="grid gap-3">
-                  <Label htmlFor="first-name">Last Name</Label>
-                  <Input id="first-name" defaultValue={user.last_name} />
-                </div>
-              </div>
-              <SheetFooter>
-                <Button type="submit">Save changes</Button>
-                <SheetClose asChild>
-                  <Button variant="outline">Close</Button>
-                </SheetClose>
-              </SheetFooter>
+                <SheetFooter>
+                  <Button type="submit" disabled={isPending}>
+                    {isPending ? 'Saving...' : 'Save changes'}
+                  </Button>
+                  <SheetClose asChild>
+                    <Button variant="outline">Close</Button>
+                  </SheetClose>
+                </SheetFooter>
+              </form>
             </SheetContent>
           </Sheet>
         </CardFooter>

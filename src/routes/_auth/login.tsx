@@ -7,8 +7,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Link } from '@tanstack/react-router'
 
-import { useAuthStore } from '@/store/auth'
-import axios from 'axios'
+import { useLogin } from '@/hooks/useLogin'
 import { useState } from 'react'
 
 export const Route = createFileRoute('/_auth/login')({
@@ -21,7 +20,7 @@ function Login() {
 
   const router = useRouter()
 
-  const setTokens = useAuthStore((state) => state.setTokens)
+  const loginMutation = useLogin()
 
   return (
     <div className="bg-background flex min-h-svh flex-col items-center justify-center gap-6 p-6 md:p-10">
@@ -73,20 +72,17 @@ function Login() {
                 </div>
                 <Button
                   type="submit"
-                  className="w-full cursor-pointer"
-                  onClick={async () => {
-                    const { data } = await axios.post(
-                      'http://localhost:8000/users/token/',
+                  disabled={loginMutation.isPending}
+                  onClick={() =>
+                    loginMutation.mutate(
+                      { username, password },
                       {
-                        username: username,
-                        password: password,
+                        onSuccess: () => router.navigate({ to: '/workflow' }),
+                        onError: () => alert('Login faled'),
                       },
                     )
-
-                    setTokens(data.access, data.refresh)
-
-                    router.navigate({ to: '/workflow' })
-                  }}
+                  }
+                  className="w-full cursor-pointer"
                 >
                   Login
                 </Button>
