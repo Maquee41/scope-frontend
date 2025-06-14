@@ -9,6 +9,7 @@ import { Link } from '@tanstack/react-router'
 
 import { useLogin } from '@/hooks/useLogin'
 import { useState } from 'react'
+import { toast, Toaster } from 'sonner'
 
 export const Route = createFileRoute('/_auth/login')({
   component: Login,
@@ -24,6 +25,7 @@ function Login() {
 
   return (
     <div className="bg-background flex min-h-svh flex-col items-center justify-center gap-6 p-6 md:p-10">
+      <Toaster className="" />
       <div className="w-full max-w-sm">
         <div className="flex flex-col gap-6">
           <form
@@ -78,7 +80,15 @@ function Login() {
                       { username, password },
                       {
                         onSuccess: () => router.navigate({ to: '/workflow' }),
-                        onError: () => alert('Login faled'),
+                        onError: () =>
+                          toast('Error', {
+                            description: 'Wrong password or username',
+                            action: {
+                              label: 'Close',
+                              onClick: () =>
+                                console.log('error toast was closed'),
+                            },
+                          }),
                       },
                     )
                   }
