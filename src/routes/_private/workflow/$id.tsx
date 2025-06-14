@@ -34,7 +34,7 @@ function WorkflowDetails() {
             <CalendarView />
           </TabsContent>
           <TabsContent value="users">
-            <UserTable />
+            <UserTable workspaceId={Number(id)} />
           </TabsContent>
         </Tabs>
       </div>

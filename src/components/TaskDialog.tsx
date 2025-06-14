@@ -94,7 +94,7 @@ export function TaskDialog({ workspaceId }: { workspaceId: number }) {
             </DialogDescription>
           </DialogHeader>
 
-          <div className="grid gap-4">
+          <div className="grid gap-4 mt-4">
             <Label>Title</Label>
             <Input value={title} onChange={(e) => setTitle(e.target.value)} />
 
