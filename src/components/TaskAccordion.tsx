@@ -66,11 +66,13 @@ export function TaskAccordion({ workspaceId }: TaskAccordionProps) {
             )}
             {groupedTasks[key].map((task: Task) => (
               <TaskCard
+                id={task.id}
                 key={task.id}
                 title={task.title}
                 description={task.description}
                 priority={task.priority}
-                date={new Date(task.deadline).toLocaleDateString()}
+                status={task.status}
+                date={new Date(task.deadline).toLocaleDateString('en-US')}
               />
             ))}
           </AccordionContent>

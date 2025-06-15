@@ -9,15 +9,6 @@ export type TaskPayload = {
   status: 'todo' | 'in_progress' | 'done'
 }
 
-export const createTask = async (token: string, payload: TaskPayload) => {
-  const { data } = await api.post('/api/tasks/', payload, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  })
-  return data
-}
-
 export type Task = {
   id: number
   workspace: number
@@ -27,6 +18,18 @@ export type Task = {
   priority: 'low' | 'medium' | 'high'
   status: 'todo' | 'in_progress' | 'done'
 }
+
+export type TaskStatus = 'todo' | 'in_progress' | 'done'
+
+export const createTask = async (token: string, payload: TaskPayload) => {
+  const { data } = await api.post('/api/tasks/', payload, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  })
+  return data
+}
+
 export const fetchTasks = async (
   token: string,
   workflowId?: number,
@@ -38,4 +41,15 @@ export const fetchTasks = async (
     headers: { Authorization: `Bearer ${token}` },
   })
   return data
+}
+
+export const updateTaskStatus = async ({
+  id,
+  status,
+}: {
+  id: number
+  status: TaskStatus
+}) => {
+  const response = await api.patch(`/api/tasks/${id}/`, { status })
+  return response.data
 }

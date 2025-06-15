@@ -108,7 +108,7 @@ export function TaskDialog({ workspaceId }: { workspaceId: number }) {
             <Popover>
               <PopoverTrigger asChild>
                 <Button variant="outline">
-                  {date ? date.toLocaleDateString() : 'Pick date'}
+                  {date ? date.toLocaleDateString('en-US') : 'Pick date'}
                 </Button>
               </PopoverTrigger>
               <PopoverContent>
