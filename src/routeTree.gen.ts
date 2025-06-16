@@ -11,14 +11,14 @@
 // Import Routes
 
 import { Route as rootRoute } from './routes/__root'
-import { Route as AuthImport } from './routes/_auth'
-import { Route as AuthLoginImport } from './routes/_auth/login'
-import { Route as AuthSignUpImport } from './routes/_auth/sign-up'
 import { Route as PrivateImport } from './routes/_private'
-import { Route as PrivateProfileImport } from './routes/_private/profile'
-import { Route as PrivateWorkflowIdImport } from './routes/_private/workflow/$id'
-import { Route as PrivateWorkflowIndexImport } from './routes/_private/workflow/index'
+import { Route as AuthImport } from './routes/_auth'
 import { Route as IndexImport } from './routes/index'
+import { Route as PrivateProfileImport } from './routes/_private/profile'
+import { Route as AuthSignUpImport } from './routes/_auth/sign-up'
+import { Route as AuthLoginImport } from './routes/_auth/login'
+import { Route as PrivateWorkflowIndexImport } from './routes/_private/workflow/index'
+import { Route as PrivateWorkflowIdImport } from './routes/_private/workflow/$id'
 
 // Create/Update Routes
 

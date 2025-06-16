@@ -1,4 +1,4 @@
-import { getWorkspacesMebers } from '@/services/workspaceService'
+import { getWorkspacesMembers } from '@/services/workspaceService'
 import { useAuthStore } from '@/store/auth'
 import { useQuery } from '@tanstack/react-query'
 
@@ -7,7 +7,7 @@ export const useWorkspace = (workspaceId: number) => {
 
   return useQuery({
     queryKey: ['workspace', workspaceId],
-    queryFn: () => getWorkspacesMebers(access, workspaceId),
+    queryFn: () => getWorkspacesMembers(access, workspaceId),
     enabled: !!access && !!workspaceId,
   })
 }

@@ -11,6 +11,7 @@ export const getProfileData = async (access: string | null) => {
 }
 
 export interface IUserProfile {
+  id: number
   username: string
   first_name: string
   last_name: string

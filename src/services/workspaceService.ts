@@ -10,7 +10,7 @@ export const getWorkspaces = async (access: string | null) => {
   return res.data
 }
 
-export const getWorkspacesMebers = async (
+export const getWorkspacesMembers = async (
   access: string | null,
   workspaceId: number,
 ) => {

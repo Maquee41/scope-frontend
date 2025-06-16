@@ -73,6 +73,9 @@ export function TaskAccordion({ workspaceId }: TaskAccordionProps) {
                 priority={task.priority}
                 status={task.status}
                 date={new Date(task.deadline).toLocaleDateString('en-US')}
+                workspaceId={workspaceId}
+                assignee={task.assignees}
+                members={[]}
               />
             ))}
           </AccordionContent>
