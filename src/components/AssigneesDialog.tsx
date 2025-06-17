@@ -4,6 +4,7 @@ import {
   Dialog,
   DialogClose,
   DialogContent,
+  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -33,6 +34,7 @@ export function AssigneesDialog({
 }: Props) {
   const accessToken = useAuthStore((s) => s.access)
   const queryClient = useQueryClient()
+  const [open, setOpen] = React.useState(false)
 
   const toggleAssignee = (userId: number) => {
     setAssignees((prev) =>
@@ -53,6 +55,7 @@ export function AssigneesDialog({
 
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['tasks'] })
+      setOpen(false) // Close dialog after success
     },
     onError: (err) => {
       console.error('Error updating assignees:', err)
@@ -60,7 +63,7 @@ export function AssigneesDialog({
   })
 
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button variant="ghost">
           <Ellipsis />
@@ -68,10 +71,10 @@ export function AssigneesDialog({
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Назначить пользователей</DialogTitle>
-          <p className="mb-2 text-sm text-muted-foreground">
-            Отметьте, кто будет работать над задачей.
-          </p>
+          <DialogTitle>Assign Users</DialogTitle>
+          <DialogDescription>
+            Select the users who will be working on this task.
+          </DialogDescription>
         </DialogHeader>
 
         <ScrollArea className="h-60 pr-4">
@@ -102,8 +105,9 @@ export function AssigneesDialog({
             onClick={() =>
               assigneeMutation.mutate({ id: taskId, assignee_ids: assignees })
             }
+            disabled={assigneeMutation.isPending}
           >
-            Save
+            {assigneeMutation.isPending ? 'Saving...' : 'Save'}
           </Button>
         </DialogFooter>
       </DialogContent>

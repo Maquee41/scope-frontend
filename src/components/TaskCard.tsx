@@ -36,6 +36,7 @@ export function TaskCard({
   priority,
   status,
   assignee,
+  members,
 }: TaskCardProps) {
   const [currentStatus, setCurrentStatus] = useState<TaskStatus>(status)
   const [assignees, setAssignees] = useState<number[]>(
@@ -83,7 +84,7 @@ export function TaskCard({
           </div>
 
           <AssigneesDialog
-            members={assignee}
+            members={members}
             assignees={assignees}
             setAssignees={setAssignees}
             taskId={id}

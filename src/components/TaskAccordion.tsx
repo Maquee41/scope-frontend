@@ -5,6 +5,7 @@ import {
   AccordionTrigger,
 } from '@/components/ui/accordion'
 import { fetchTasks, type Task } from '@/services/taskService'
+import { getWorkspacesMembers } from '@/services/workspaceService'
 import { useAuthStore } from '@/store/auth'
 import { useQuery } from '@tanstack/react-query'
 import { TaskCard } from './TaskCard'
@@ -13,10 +14,23 @@ type TaskAccordionProps = {
   workspaceId: number
 }
 
+type Member = {
+  id: number
+  username: string
+  email: string
+  first_name: string
+  last_name: string
+}
+
 export function TaskAccordion({ workspaceId }: TaskAccordionProps) {
   const access = useAuthStore((s) => s.access)
 
-  const { data, isLoading, isError, error } = useQuery<Task[], Error>({
+  const {
+    data: tasksData,
+    isLoading: isTasksLoading,
+    isError: isTasksError,
+    error: tasksError,
+  } = useQuery<Task[], Error>({
     queryKey: ['tasks', workspaceId],
     queryFn: () => {
       if (!access) throw new Error('No access token')
@@ -25,10 +39,27 @@ export function TaskAccordion({ workspaceId }: TaskAccordionProps) {
     enabled: !!access && !!workspaceId,
   })
 
-  const tasks: Task[] = data ?? []
+  const {
+    data: workspaceData,
+    isLoading: isWorkspaceLoading,
+    isError: isWorkspaceError,
+    error: workspaceError,
+  } = useQuery({
+    queryKey: ['workspace', workspaceId],
+    queryFn: () => {
+      if (!access) throw new Error('No access token')
+      return getWorkspacesMembers(access, workspaceId)
+    },
+    enabled: !!access && !!workspaceId,
+  })
 
-  if (isLoading) return <div>Loading tasks...</div>
-  if (isError) return <div>Error loading tasks: {error?.message}</div>
+  if (isTasksLoading || isWorkspaceLoading) return <div>Loading...</div>
+  if (isTasksError) return <div>Error loading tasks: {tasksError?.message}</div>
+  if (isWorkspaceError)
+    return <div>Error loading workspace: {workspaceError?.message}</div>
+
+  const tasks: Task[] = tasksData ?? []
+  const members: Member[] = workspaceData?.members ?? []
 
   const groupedTasks = {
     todo: tasks.filter((t: Task) => t.status === 'todo'),
@@ -75,7 +106,7 @@ export function TaskAccordion({ workspaceId }: TaskAccordionProps) {
                 date={new Date(task.deadline).toLocaleDateString('en-US')}
                 workspaceId={workspaceId}
                 assignee={task.assignees}
-                members={[]}
+                members={members}
               />
             ))}
           </AccordionContent>
