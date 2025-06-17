@@ -8,6 +8,7 @@ export type TaskPayload = {
   deadline: string
   priority: 'low' | 'medium' | 'high'
   status: 'todo' | 'in_progress' | 'done'
+  assignee_ids: []
 }
 
 export type Task = {
@@ -72,6 +73,29 @@ export const updateTaskAssignees = async ({
   const res = await api.patch(
     `/api/tasks/${id}/`,
     { assignee_ids },
+    {
+      headers: {
+        Authorization: `Bearer ${access}`,
+      },
+    },
+  )
+
+  return res.data
+}
+
+export const getTasksByDay = async ({
+  workflowId,
+  day,
+  access,
+}: {
+  workflowId: number
+  day: string
+  access: string | null
+}) => {
+  if (!access) throw new Error('No access token')
+
+  const res = await api.get(
+    `/api/tasks/by-date/?workspace_id=${workflowId}&date=${day}`,
     {
       headers: {
         Authorization: `Bearer ${access}`,

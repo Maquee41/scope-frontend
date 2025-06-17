@@ -75,6 +75,7 @@ export function TaskDialog({ workspaceId }: { workspaceId: number }) {
       deadline: date.toISOString(),
       priority,
       status: 'todo',
+      assignee_ids: [],
     })
   }
 
