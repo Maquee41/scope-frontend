@@ -8,6 +8,7 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 import { getTasksByDay } from '@/services/taskService'
+import { useAuthStore } from '@/store/auth'
 import { format } from 'date-fns'
 import { useEffect, useState } from 'react'
 
@@ -19,14 +20,12 @@ type Task = {
   status: string
 }
 
-export function CalendarView() {
+export function CalendarView({ workspaceId }: { workspaceId: number }) {
   const [date, setDate] = useState<Date | undefined>()
   const [tasks, setTasks] = useState<Task[]>([])
   const [loading, setLoading] = useState(false)
 
-  // Replace with actual access token and workflowId from your context/session
-  const access = 'your-access-token'
-  const workflowId = 1
+  const access = useAuthStore((s) => s.access)
 
   useEffect(() => {
     const fetchTasks = async () => {
@@ -35,7 +34,7 @@ export function CalendarView() {
       try {
         const formattedDate = format(date, 'yyyy-MM-dd')
         const result = await getTasksByDay({
-          workflowId,
+          workflowId: workspaceId,
           day: formattedDate,
           access,
         })
