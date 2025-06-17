@@ -32,26 +32,28 @@ export const postComment = async ({
   taskId,
   text,
   access,
+  files = [],
 }: {
   taskId: number
   text: string
   access: string | null
+  files?: File[]
 }) => {
   if (!access) throw new Error('No access token')
 
-  const response = await api.post(
-    'http://127.0.0.1:8000/api/comments/',
-    {
-      text,
-      task: taskId,
+  const formData = new FormData()
+  formData.append('text', text)
+  formData.append('task', taskId.toString())
+  files.forEach((file) => {
+    formData.append('uploaded_files', file)
+  })
+
+  const response = await api.post('/api/comments/', formData, {
+    headers: {
+      Authorization: `Bearer ${access}`,
+      'Content-Type': 'multipart/form-data',
     },
-    {
-      headers: {
-        Authorization: `Bearer ${access}`,
-        'Content-Type': 'application/json',
-        Accept: 'application/json',
-      },
-    },
-  )
+  })
+
   return response.data
 }
