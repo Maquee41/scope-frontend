@@ -82,7 +82,9 @@ export function NavUser({
                 <User />
                 Profile
               </DropdownMenuItem>
-              <DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => router.navigate({ to: '/notifications' })}
+              >
                 <Bell />
                 Notifications
               </DropdownMenuItem>
